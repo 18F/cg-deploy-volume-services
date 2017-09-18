@@ -1,0 +1,96 @@
+---
+jobs:
+- name: deploy-nfs-broker-development
+  plan:
+  - aggregate:
+    - get: config
+      trigger: true
+    - get: broker-src
+      trigger: true
+    - get: pipeline-tasks
+  - task: ensure-database
+    file: pipeline-tasks/ensure-service.yml
+    params:
+      CF_API_URL: {{cf-api-url-development}}
+      CF_USERNAME: {{cf-username-development}}
+      CF_PASSWORD: {{cf-password-development}}
+      CF_ORGANIZATION: {{broker-organization-development}}
+      CF_SPACE: {{broker-space-development}}
+      SERVICE_NAME: aws-rds
+      PLAN_NAME: shared-psql
+      INSTANCE_NAME: nfs-volume
+      TIMEOUT: 300
+  - task: compile-broker
+    file: config/ci/compile-broker.yml
+  - put: broker-app
+    params:
+      path: compiled
+      current_app_name: nfs-broker
+      manifest: config/ci/manifest.yml
+      environment_variables:
+        USERNAME: {{development-auth-name}}
+        PASSWORD: {{development-auth-pass}}
+  - task: update-broker
+    file: pipeline-tasks/register-service-broker.yml
+    params:
+      CF_API_URL: {{cf-api-url-development}}
+      CF_USERNAME: {{cf-username-development}}
+      CF_PASSWORD: {{cf-password-development}}
+      CF_ORGANIZATION: {{cf-organization-development}}
+      CF_SPACE: {{cf-space-development}}
+      BROKER_NAME: nfs-broker
+      AUTH_USER: {{development-auth-name}}
+      AUTH_PASS: {{development-auth-pass}}
+      SERVICES: nfs
+      SERVICE_ORGANIZATION: cloud-gov
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfsbroker on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfsbroker on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
+resources:
+- name: config
+  type: git
+  source:
+    uri: {{config-git-url}}
+    branch: {{config-git-branch}}
+
+- name: pipeline-tasks
+  type: git
+  source:
+    uri: {{pipeline-tasks-git-url}}
+    branch: {{pipeline-tasks-git-branch}}
+
+- name: broker-src
+  type: git
+  source:
+    uri: {{broker-git-url}}
+    branch: {{broker-git-branch}}
+
+- name: broker-app
+  type: cf
+  source:
+    api: {{cf-api-url-development}}
+    username: {{cf-username-development}}
+    password: {{cf-password-development}}
+    organization: {{cf-organization-development}}
+    space: {{cf-space-development}}
+
+- name: slack
+  type: slack-notification
+  source:
+    url: {{slack-webhook-url}}

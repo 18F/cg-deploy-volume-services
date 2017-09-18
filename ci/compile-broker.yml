@@ -1,0 +1,18 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source:
+    repository: golang
+    tag: "1.8"
+
+inputs:
+- name: cf-manifests
+- name: broker-src
+  path: gopath/src/code.cloudfoundry.org/nfsbroker
+outputs:
+- name: compiled
+
+run:
+  path: cf-manifests/ci/compile-broker.sh
