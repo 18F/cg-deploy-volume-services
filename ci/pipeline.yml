@@ -22,7 +22,7 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app
+  - put: broker-app-development
     params:
       path: compiled
       current_app_name: nfs-broker
@@ -62,6 +62,132 @@ jobs:
       username: {{slack-username}}
       icon_url: {{slack-icon-url}}
 
+- name: deploy-nfs-broker-staging
+  plan:
+  - aggregate:
+    - get: config
+      trigger: true
+    - get: broker-src
+      trigger: true
+    - get: pipeline-tasks
+  - task: ensure-database
+    file: pipeline-tasks/ensure-service.yml
+    params:
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-username-staging}}
+      CF_PASSWORD: {{cf-password-staging}}
+      CF_ORGANIZATION: {{broker-organization-staging}}
+      CF_SPACE: {{broker-space-staging}}
+      SERVICE_NAME: aws-rds
+      PLAN_NAME: shared-psql
+      INSTANCE_NAME: nfs-volume
+      TIMEOUT: 300
+  - task: compile-broker
+    file: config/ci/compile-broker.yml
+  - put: broker-app-staging
+    params:
+      path: compiled
+      current_app_name: nfs-broker
+      manifest: config/ci/manifest.yml
+      environment_variables:
+        USERNAME: {{staging-auth-name}}
+        PASSWORD: {{staging-auth-pass}}
+  - task: update-broker
+    file: pipeline-tasks/register-service-broker.yml
+    params:
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-username-staging}}
+      CF_PASSWORD: {{cf-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
+      BROKER_NAME: nfs-broker
+      AUTH_USER: {{staging-auth-name}}
+      AUTH_PASS: {{staging-auth-pass}}
+      SERVICES: nfs
+      SERVICE_ORGANIZATION: cloud-gov
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfsbroker on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfsbroker on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
+- name: deploy-nfs-broker-production
+  plan:
+  - aggregate:
+    - get: config
+      trigger: true
+      passed: [deploy-nfs-broker-staging]
+    - get: broker-src
+      passed: [deploy-nfs-broker-staging]
+      trigger: true
+    - get: pipeline-tasks
+  - task: ensure-database
+    file: pipeline-tasks/ensure-service.yml
+    params:
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-username-production}}
+      CF_PASSWORD: {{cf-password-production}}
+      CF_ORGANIZATION: {{broker-organization-production}}
+      CF_SPACE: {{broker-space-production}}
+      SERVICE_NAME: aws-rds
+      PLAN_NAME: shared-psql
+      INSTANCE_NAME: nfs-volume
+      TIMEOUT: 300
+  - task: compile-broker
+    file: config/ci/compile-broker.yml
+  - put: broker-app-production
+    params:
+      path: compiled
+      current_app_name: nfs-broker
+      manifest: config/ci/manifest.yml
+      environment_variables:
+        USERNAME: {{production-auth-name}}
+        PASSWORD: {{production-auth-pass}}
+  - task: update-broker
+    file: pipeline-tasks/register-service-broker.yml
+    params:
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-username-production}}
+      CF_PASSWORD: {{cf-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
+      BROKER_NAME: nfs-broker
+      AUTH_USER: {{production-auth-name}}
+      AUTH_PASS: {{production-auth-pass}}
+      SERVICES: nfs
+      SERVICE_ORGANIZATION: cloud-gov
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfsbroker on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfsbroker on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
 - name: deploy-nfs-server-development
   serial: true
   plan:
@@ -78,7 +204,7 @@ jobs:
       trigger: true
     - get: master-bosh-root-cert
   - task: manifest
-    config:
+    config: &nfs-server-config
       platform: linux
       image_resource:
         type: docker-image
@@ -97,13 +223,14 @@ jobs:
           spruce merge config/bosh/nfs-deployment.yml \
             common/secrets.yml \
             > manifest/manifest.yml
-  - task: lint-manifest
+  - &nfs-server-lint
+    task: lint-manifest
     file: pipeline-tasks/lint-manifest.yml
     input_mapping:
       pipeline-config: config
       lint-manifest: manifest
   - put: nfs-server-development
-    params:
+    params: &nfs-server-params
       cert: master-bosh-root-cert/master-bosh.crt
       manifest: manifest/manifest.yml
       releases:
@@ -129,6 +256,87 @@ jobs:
       username: {{slack-username}}
       icon_url: {{slack-icon-url}}
 
+- name: deploy-nfs-server-staging
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: config
+      trigger: true
+    - get: nfs-volume-release
+      trigger: true
+    - get: common
+      resource: common-staging
+      trigger: true
+    - get: stemcell
+      trigger: true
+    - get: master-bosh-root-cert
+  - task: manifest
+    config: *nfs-server-config
+  - *nfs-server-lint
+  - put: nfs-server-staging
+    params: *nfs-server-params
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfstestserver on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfstestserver on staging
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
+- name: deploy-nfs-server-production
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: config
+      passed: [deploy-nfs-server-staging]
+      trigger: true
+    - get: nfs-volume-release
+      passed: [deploy-nfs-server-staging]
+      trigger: true
+    - get: common
+      resource: common-production
+      trigger: true
+    - get: stemcell
+      passed: [deploy-nfs-server-staging]
+      trigger: true
+    - get: master-bosh-root-cert
+  - task: manifest
+    config: *nfs-server-config
+  - *nfs-server-lint
+  - put: nfs-server-production
+    params: *nfs-server-params
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfstestserver on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfstestserver on production
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
 resources:
 - name: config
   type: git
@@ -148,7 +356,7 @@ resources:
     uri: {{broker-git-url}}
     branch: {{broker-git-branch}}
 
-- name: broker-app
+- name: broker-app-development
   type: cf
   source:
     api: {{cf-api-url-development}}
@@ -156,6 +364,24 @@ resources:
     password: {{cf-password-development}}
     organization: {{cf-organization-development}}
     space: {{cf-space-development}}
+
+- name: broker-app-staging
+  type: cf
+  source:
+    api: {{cf-api-url-staging}}
+    username: {{cf-username-staging}}
+    password: {{cf-password-staging}}
+    organization: {{cf-organization-staging}}
+    space: {{cf-space-staging}}
+
+- name: broker-app-production
+  type: cf
+  source:
+    api: {{cf-api-url-production}}
+    username: {{cf-username-production}}
+    password: {{cf-password-production}}
+    organization: {{cf-organization-production}}
+    space: {{cf-space-production}}
 
 - name: master-bosh-root-cert
   type: s3-iam
@@ -170,6 +396,24 @@ resources:
     bucket_name: {{private-bucket-development}}
     secrets_passphrase: {{passphrase-development}}
     secrets_file: nfs-development.yml
+    bosh_cert: bosh.pem
+    region: {{aws-region}}
+
+- name: common-staging
+  type: cg-common
+  source:
+    bucket_name: {{private-bucket-staging}}
+    secrets_passphrase: {{passphrase-staging}}
+    secrets_file: nfs-staging.yml
+    bosh_cert: bosh.pem
+    region: {{aws-region}}
+
+- name: common-production
+  type: cg-common
+  source:
+    bucket_name: {{private-bucket-production}}
+    secrets_passphrase: {{passphrase-production}}
+    secrets_file: nfs-production.yml
     bosh_cert: bosh.pem
     region: {{aws-region}}
 
@@ -189,6 +433,22 @@ resources:
     target: {{bosh-target-development}}
     username: {{bosh-username-development}}
     password: {{bosh-password-development}}
+    deployment: nfs-volume
+
+- name: nfs-server-staging
+  type: 18f-bosh-deployment
+  source:
+    target: {{bosh-target-staging}}
+    username: {{bosh-username-staging}}
+    password: {{bosh-password-staging}}
+    deployment: nfs-volume
+
+- name: nfs-server-production
+  type: 18f-bosh-deployment
+  source:
+    target: {{bosh-target-production}}
+    username: {{bosh-username-production}}
+    password: {{bosh-password-production}}
     deployment: nfs-volume
 
 - name: slack
