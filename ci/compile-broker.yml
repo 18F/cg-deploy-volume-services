@@ -8,11 +8,11 @@ image_resource:
     tag: "1.8"
 
 inputs:
-- name: cf-manifests
+- name: config
 - name: broker-src
   path: gopath/src/code.cloudfoundry.org/nfsbroker
 outputs:
 - name: compiled
 
 run:
-  path: cf-manifests/ci/compile-broker.sh
+  path: config/ci/compile-broker.sh

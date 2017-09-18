@@ -11,4 +11,4 @@ pushd gopath/src/code.cloudfoundry.org/nfsbroker
   cp -r bin "${target}/"
 popd
 
-cp cf-manifests/ci/Procfile compiled
+cp config/ci/Procfile compiled
