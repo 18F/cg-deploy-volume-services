@@ -62,6 +62,73 @@ jobs:
       username: {{slack-username}}
       icon_url: {{slack-icon-url}}
 
+- name: deploy-nfs-server-development
+  serial: true
+  plan:
+  - aggregate:
+    - get: pipeline-tasks
+    - get: config
+      trigger: true
+    - get: nfs-volume-release
+      trigger: true
+    - get: common
+      resource: common-development
+      trigger: true
+    - get: stemcell
+      trigger: true
+    - get: master-bosh-root-cert
+  - task: manifest
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+          repository: 18fgsa/concourse-task
+      inputs:
+      - name: config
+      - name: common
+      outputs:
+      - name: manifest
+      run:
+        path: sh
+        args:
+        - -exc
+        - |
+          spruce merge config/bosh/nfs-deployment.yml \
+            common/secrets.yml \
+            > manifest/manifest.yml
+  - task: lint-manifest
+    file: pipeline-tasks/lint-manifest.yml
+    input_mapping:
+      pipeline-config: config
+      lint-manifest: manifest
+  - put: nfs-server-development
+    params:
+      cert: master-bosh-root-cert/master-bosh.crt
+      manifest: manifest/manifest.yml
+      releases:
+      - nfs-volume-release/*.tgz
+      stemcells:
+      - stemcell/*.tgz
+  on_success:
+    put: slack
+    params:
+      text: |
+        :white_check_mark: Successfully deployed nfstestserver on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+  on_failure:
+    put: slack
+    params:
+      text: |
+        :x: FAILED to deploy nfstestserver on development
+        <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
+      channel: {{slack-channel}}
+      username: {{slack-username}}
+      icon_url: {{slack-icon-url}}
+
 resources:
 - name: config
   type: git
@@ -90,7 +157,62 @@ resources:
     organization: {{cf-organization-development}}
     space: {{cf-space-development}}
 
+- name: master-bosh-root-cert
+  type: s3-iam
+  source:
+    bucket: {{private-bucket-production}}
+    region_name: {{aws-region}}
+    versioned_file: master-bosh.crt
+
+- name: common-development
+  type: cg-common
+  source:
+    bucket_name: {{private-bucket-development}}
+    secrets_passphrase: {{passphrase-development}}
+    secrets_file: nfs-development.yml
+    bosh_cert: bosh.pem
+    region: {{aws-region}}
+
+- name: nfs-volume-release
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/nfs-volume-release
+
+- name: stemcell
+  type: bosh-io-stemcell
+  source:
+    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+
+- name: nfs-server-development
+  type: 18f-bosh-deployment
+  source:
+    target: {{bosh-target-development}}
+    username: {{bosh-username-development}}
+    password: {{bosh-password-development}}
+    deployment: nfs-volume
+
 - name: slack
   type: slack-notification
   source:
     url: {{slack-webhook-url}}
+
+resource_types:
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: cfcommunity/slack-notification-resource
+
+- name: s3-iam
+  type: docker-image
+  source:
+    repository: 18fgsa/s3-resource
+
+- name: 18f-bosh-deployment
+  type: docker-image
+  source:
+    repository: 18fgsa/bosh-deployment-resource
+
+- name: cg-common
+  type: docker-image
+  source:
+    repository: 18fgsa/cg-common-resource

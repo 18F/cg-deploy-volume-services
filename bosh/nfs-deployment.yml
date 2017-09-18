@@ -1,0 +1,30 @@
+director_uuid: (( param "specify director uuid" ))
+name: nfs-volume
+
+releases:
+- name: nfs-volume
+  version: 1.1.0
+
+stemcells:
+- alias: default
+  name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+  version: '3445.7'
+
+update:
+  canaries: 1
+  canary_watch_time: 3000-180000
+  max_in_flight: 4
+  update_watch_time: 3000-180000
+
+instance_groups:
+- name: nfs-server
+  persistent_disk_type: nfs-volume
+  vm_type: nfs-volume
+  stemcell: default
+  azs: [z1]
+  networks:
+  - name: services
+  instances: 1
+  jobs:
+  - name: nfstestserver
+    release: nfs-volume
