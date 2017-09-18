@@ -8,12 +8,12 @@ releases:
 stemcells:
 - alias: default
   name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
-  version: '3445.7'
+  version: latest
 
 update:
   canaries: 1
-  canary_watch_time: 3000-180000
   max_in_flight: 4
+  canary_watch_time: 3000-180000
   update_watch_time: 3000-180000
 
 instance_groups:
