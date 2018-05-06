@@ -418,9 +418,11 @@ resources:
     region: {{aws-region}}
 
 - name: nfs-volume-release
-  type: bosh-io-release
+  type: s3-iam
   source:
-    repository: cloudfoundry/nfs-volume-release
+    regexp: nfs-volume-(.*).tgz
+    bucket: {{bosh-releases-bucket}}
+    region_name: {{aws-region}}
 
 - name: stemcell
   type: bosh-io-stemcell
@@ -428,27 +430,30 @@ resources:
     name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
 
 - name: nfs-server-development
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
-    target: {{bosh-target-development}}
-    username: {{bosh-username-development}}
-    password: {{bosh-password-development}}
+    target: ((bosh-target-development))
+    client: ((bosh-client-development))
+    client_secret: ((bosh-client-secret-development))
+    ca_cert: ((bosh-ca-cert))
     deployment: nfs-volume
 
 - name: nfs-server-staging
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
-    target: {{bosh-target-staging}}
-    username: {{bosh-username-staging}}
-    password: {{bosh-password-staging}}
+    target: ((bosh-target-staging))
+    client: ((bosh-client-staging))
+    client_secret: ((bosh-client-secret-staging))
+    ca_cert: ((bosh-ca-cert))
     deployment: nfs-volume
 
 - name: nfs-server-production
-  type: 18f-bosh-deployment
+  type: bosh-deployment
   source:
-    target: {{bosh-target-production}}
-    username: {{bosh-username-production}}
-    password: {{bosh-password-production}}
+    target: ((bosh-target-production))
+    client: ((bosh-client-production))
+    client_secret: ((bosh-client-secret-production))
+    ca_cert: ((bosh-ca-cert))
     deployment: nfs-volume
 
 - name: slack
@@ -467,10 +472,10 @@ resource_types:
   source:
     repository: 18fgsa/s3-resource
 
-- name: 18f-bosh-deployment
+- name: bosh-deployment
   type: docker-image
   source:
-    repository: 18fgsa/bosh-deployment-resource
+    repository: cloudfoundry/bosh-deployment-resource
 
 - name: cg-common
   type: docker-image
