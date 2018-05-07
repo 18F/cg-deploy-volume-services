@@ -337,6 +337,28 @@ jobs:
       username: {{slack-username}}
       icon_url: {{slack-icon-url}}
 
+- name: test-development
+  plan:
+  - aggregate:
+    - get: config
+      passed: [deploy-nfs-broker-development, deploy-nfs-server-development]
+      trigger: true
+    - get: broker-src
+      passed: [deploy-nfs-broker-development]
+      trigger: true
+    - get: release-src
+  - task: test
+    file: config/ci/acceptance-test.yml
+    params:
+      CF_API_URL: {{cf-api-url-development}}
+      CF_USERNAME: {{cf-username-development}}
+      CF_PASSWORD: {{cf-password-development}}
+      CF_ORGANIZATION: {{test-organization-development}}
+      CF_SPACE: {{test-space-development}}
+      SERVICE_NAME: nfs
+      PLAN_NAME: Existing
+      SHARE_ID: {{test-share-id}}
+
 resources:
 - name: config
   type: git
@@ -355,6 +377,12 @@ resources:
   source:
     uri: {{broker-git-url}}
     branch: {{broker-git-branch}}
+
+- name: release-src
+  type: git
+  source:
+    uri: {{release-git-url}}
+    branch: {{release-git-branch}}
 
 - name: broker-app-development
   type: cf
