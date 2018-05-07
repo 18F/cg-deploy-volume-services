@@ -27,3 +27,6 @@ instance_groups:
   jobs:
   - name: nfstestserver
     release: nfs-volume
+    properties:
+      nfstestserver:
+        export_volumes: (( param "specify export volumes" ))
