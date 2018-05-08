@@ -9,8 +9,7 @@ image_resource:
 
 inputs:
 - name: config
-- name: broker-src
-  path: gopath/src/code.cloudfoundry.org/nfsbroker
+- name: release-src
 outputs:
 - name: compiled
 
