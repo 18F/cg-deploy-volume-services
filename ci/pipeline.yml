@@ -42,7 +42,7 @@ jobs:
       AUTH_USER: {{development-auth-name}}
       AUTH_PASS: {{development-auth-pass}}
       SERVICES: nfs
-      SERVICE_ORGANIZATION: cloud-gov
+      SERVICE_ORGANIZATION: {{service-organization-development}}
   on_success:
     put: slack
     params:
@@ -193,7 +193,7 @@ jobs:
       AUTH_USER: {{staging-auth-name}}
       AUTH_PASS: {{staging-auth-pass}}
       SERVICES: nfs
-      SERVICE_ORGANIZATION: cloud-gov
+      SERVICE_ORGANIZATION: {{service-organization-staging}}
   on_success:
     put: slack
     params:
@@ -321,7 +321,7 @@ jobs:
       AUTH_USER: {{production-auth-name}}
       AUTH_PASS: {{production-auth-pass}}
       SERVICES: nfs
-      SERVICE_ORGANIZATION: cloud-gov
+      SERVICE_ORGANIZATION: {{service-organization-production}}
   on_success:
     put: slack
     params:
