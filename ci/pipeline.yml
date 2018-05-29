@@ -208,7 +208,7 @@ jobs:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/staging.yml
-      - common-development/nfs-staging-decrypted.yml
+      - common-staging/nfs-staging-decrypted.yml
   on_success:
     put: slack
     params:
@@ -339,7 +339,7 @@ jobs:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/production.yml
-      - common-development/nfs-production-decrypted.yml
+      - common-production/nfs-production-decrypted.yml
   on_success:
     put: slack
     params:
@@ -437,21 +437,21 @@ resources:
   type: s3-iam
   source:
     bucket_name: {{private-bucket-development}}
-    secrets_file: nfs-development-decrypted.yml
+    versioned_file: nfs-development-decrypted.yml
     region: {{aws-region}}
 
 - name: common-staging
   type: s3-iam
   source:
     bucket_name: {{private-bucket-staging}}
-    secrets_file: nfs-staging-decrypted.yml
+    versioned_file: nfs-staging-decrypted.yml
     region: {{aws-region}}
 
 - name: common-production
   type: s3-iam
   source:
     bucket_name: {{private-bucket-production}}
-    secrets_file: nfs-production-decrypted.yml
+    versioned_file: nfs-production-decrypted.yml
     region: {{aws-region}}
 
 - name: nfs-volume-release
