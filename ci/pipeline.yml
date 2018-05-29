@@ -71,46 +71,22 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common
-      resource: common-development
+    - get: common-development
       trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
-  - task: manifest
-    config: &nfs-server-config
-      platform: linux
-      image_resource:
-        type: docker-image
-        source:
-          repository: 18fgsa/concourse-task
-      inputs:
-      - name: config
-      - name: common
-      outputs:
-      - name: manifest
-      run:
-        path: sh
-        args:
-        - -exc
-        - |
-          spruce merge config/bosh/nfs-deployment.yml \
-            common/secrets.yml \
-            > manifest/manifest.yml
-  - &nfs-server-lint
-    task: lint-manifest
-    file: pipeline-tasks/lint-manifest.yml
-    input_mapping:
-      pipeline-config: config
-      lint-manifest: manifest
   - put: nfs-server-development
     params: &nfs-server-params
       cert: master-bosh-root-cert/master-bosh.crt
-      manifest: manifest/manifest.yml
+      manifest: bosh/manifest.yml
       releases:
       - nfs-volume-release/*.tgz
       stemcells:
       - stemcell/*.tgz
+      vars_files:
+      - config/varsfiles/development.yml
+      - common-development/nfs-development-decrypted.yml
   on_success:
     put: slack
     params:
@@ -222,17 +198,17 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common
-      resource: common-staging
+    - get: common-staging
       trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
-  - task: manifest
-    config: *nfs-server-config
-  - *nfs-server-lint
   - put: nfs-server-staging
-    params: *nfs-server-params
+    params: 
+      <<: *nfs-server-params
+      vars_files:
+      - config/bosh/varsfiles/staging.yml
+      - common-development/nfs-staging-decrypted.yml
   on_success:
     put: slack
     params:
@@ -352,18 +328,18 @@ jobs:
     - get: nfs-volume-release
       passed: [test-staging]
       trigger: true
-    - get: common
-      resource: common-production
+    - get: common-production
       trigger: true
     - get: stemcell
       passed: [test-staging]
       trigger: true
     - get: master-bosh-root-cert
-  - task: manifest
-    config: *nfs-server-config
-  - *nfs-server-lint
   - put: nfs-server-production
-    params: *nfs-server-params
+    params:
+      <<: *nfs-server-params
+      vars_files:
+      - config/bosh/varsfiles/production.yml
+      - common-development/nfs-production-decrypted.yml
   on_success:
     put: slack
     params:
@@ -458,30 +434,24 @@ resources:
     versioned_file: master-bosh.crt
 
 - name: common-development
-  type: cg-common
+  type: s3-iam
   source:
     bucket_name: {{private-bucket-development}}
-    secrets_passphrase: {{passphrase-development}}
-    secrets_file: nfs-development.yml
-    bosh_cert: bosh.pem
+    secrets_file: nfs-development-decrypted.yml
     region: {{aws-region}}
 
 - name: common-staging
-  type: cg-common
+  type: s3-iam
   source:
     bucket_name: {{private-bucket-staging}}
-    secrets_passphrase: {{passphrase-staging}}
-    secrets_file: nfs-staging.yml
-    bosh_cert: bosh.pem
+    secrets_file: nfs-staging-decrypted.yml
     region: {{aws-region}}
 
 - name: common-production
-  type: cg-common
+  type: s3-iam
   source:
     bucket_name: {{private-bucket-production}}
-    secrets_passphrase: {{passphrase-production}}
-    secrets_file: nfs-production.yml
-    bosh_cert: bosh.pem
+    secrets_file: nfs-production-decrypted.yml
     region: {{aws-region}}
 
 - name: nfs-volume-release
