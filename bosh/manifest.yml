@@ -30,9 +30,9 @@ instance_groups:
   - name: consul_agent
     release: consul
     consumes:
-      consul_common: {from: consul_common_link, deployment: (( param "specify cf deployment" ))}
+      consul_common: ((cf-deployment))
       consul_server: nil
-      consul_client: {from: consul_client_link, deployment: (( param "specify cf deployment" ))}
+      consul_client: ((cf-deployment))
     properties:
       consul:
         agent:
@@ -44,4 +44,4 @@ instance_groups:
     release: nfs-volume
     properties:
       nfstestserver:
-        export_volumes: (( param "specify export volumes" ))
+        export_volumes: ((nfstestserver-volumes))
