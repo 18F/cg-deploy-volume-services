@@ -79,7 +79,7 @@ jobs:
   - put: nfs-server-development
     params: &nfs-server-params
       cert: master-bosh-root-cert/master-bosh.crt
-      manifest: bosh/manifest.yml
+      manifest: config/bosh/manifest.yml
       releases:
       - nfs-volume-release/*.tgz
       stemcells:
