@@ -85,7 +85,7 @@ jobs:
       stemcells:
       - stemcell/*.tgz
       vars_files:
-      - config/varsfiles/development.yml
+      - config/bosh/varsfiles/development.yml
       - common-development/nfs-development-decrypted.yml
   on_success:
     put: slack
