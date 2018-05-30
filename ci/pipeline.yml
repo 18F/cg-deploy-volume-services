@@ -436,21 +436,21 @@ resources:
 - name: common-development
   type: s3-iam
   source:
-    bucket_name: {{private-bucket-development}}
+    bucket: {{private-bucket-development}}
     versioned_file: nfs-development-decrypted.yml
     region_name: {{aws-region}}
 
 - name: common-staging
   type: s3-iam
   source:
-    bucket_name: {{private-bucket-staging}}
+    bucket: {{private-bucket-staging}}
     versioned_file: nfs-staging-decrypted.yml
     region_name: {{aws-region}}
 
 - name: common-production
   type: s3-iam
   source:
-    bucket_name: {{private-bucket-production}}
+    bucket: {{private-bucket-production}}
     versioned_file: nfs-production-decrypted.yml
     region_name: {{aws-region}}
 
