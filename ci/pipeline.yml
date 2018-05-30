@@ -438,21 +438,21 @@ resources:
   source:
     bucket_name: {{private-bucket-development}}
     versioned_file: nfs-development-decrypted.yml
-    region: {{aws-region}}
+    region_name: {{aws-region}}
 
 - name: common-staging
   type: s3-iam
   source:
     bucket_name: {{private-bucket-staging}}
     versioned_file: nfs-staging-decrypted.yml
-    region: {{aws-region}}
+    region_name: {{aws-region}}
 
 - name: common-production
   type: s3-iam
   source:
     bucket_name: {{private-bucket-production}}
     versioned_file: nfs-production-decrypted.yml
-    region: {{aws-region}}
+    region_name: {{aws-region}}
 
 - name: nfs-volume-release
   type: s3-iam
@@ -513,8 +513,3 @@ resource_types:
   type: docker-image
   source:
     repository: cloudfoundry/bosh-deployment-resource
-
-- name: cg-common
-  type: docker-image
-  source:
-    repository: 18fgsa/cg-common-resource
