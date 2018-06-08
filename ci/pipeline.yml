@@ -398,6 +398,7 @@ resources:
   source:
     uri: {{release-git-url}}
     branch: {{release-git-branch}}
+    tag_filter: v*
 
 - name: broker-app-development
   type: cf
