@@ -7,6 +7,8 @@ jobs:
       trigger: true
     - get: release-src
       trigger: true
+      params:
+        include_source_tarball: true
     - get: pipeline-tasks
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
@@ -115,6 +117,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-development]
       trigger: true
+      params:
+        include_source_tarball: true
   - task: test
     file: config/ci/acceptance-test.yml
     params:
@@ -134,6 +138,8 @@ jobs:
       trigger: true
     - get: release-src
       trigger: true
+      params:
+        include_source_tarball: true
     - get: pipeline-tasks
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
@@ -237,6 +243,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-staging]
       trigger: true
+      params:
+        include_source_tarball: true
     - get: nfs-volume-release
       passed: [deploy-nfs-server-staging]
     - get: stemcell
@@ -262,6 +270,8 @@ jobs:
     - get: release-src
       passed: [test-staging]
       trigger: true
+      params:
+        include_source_tarball: true
     - get: pipeline-tasks
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
@@ -368,6 +378,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-production]
       trigger: true
+      params:
+        include_source_tarball: true
   - task: test
     file: config/ci/acceptance-test.yml
     params:
@@ -394,10 +406,11 @@ resources:
     branch: {{pipeline-tasks-git-branch}}
 
 - name: release-src
-  type: git
+  type: github-release
   source:
-    uri: {{release-git-url}}
-    branch: {{release-git-branch}}
+    owner: cloudfoundry
+    repository: nfs-volume-release
+    access_token: ((github-access-token))
 
 - name: broker-app-development
   type: cf

@@ -6,7 +6,10 @@ cf api "${CF_API_URL}"
 (set +x; cf auth "${CF_USERNAME}" "${CF_PASSWORD}")
 cf t -o "${CF_ORGANIZATION}" -s "${CF_SPACE}"
 
-pushd release-src/src/code.cloudfoundry.org/persi-acceptance-tests/assets/pora
+mkdir -p src
+tar xf release-src/source.tar.gz -C src --strip-components=1
+
+pushd src/src/code.cloudfoundry.org/persi-acceptance-tests/assets/pora
   cf push --no-start pora
 popd
 

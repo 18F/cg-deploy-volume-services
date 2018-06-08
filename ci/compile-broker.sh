@@ -9,7 +9,10 @@ target=$(pwd)/compiled
 go get github.com/onsi/ginkgo/ginkgo
 go get github.com/onsi/gomega
 
-pushd release-src/src/code.cloudfoundry.org/nfsbroker
+mkdir -p src
+tar xf release-src/source.tar.gz -C src --strip-components=1
+
+pushd src/src/code.cloudfoundry.org/nfsbroker
   ginkgo -r
   go build -o bin/nfsbroker
   cp -r bin "${target}/"
