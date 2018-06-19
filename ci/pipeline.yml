@@ -27,6 +27,7 @@ jobs:
       path: compiled
       current_app_name: nfs-broker
       manifest: config/ci/manifest.yml
+      show_app_log: true
       environment_variables:
         USERNAME: {{development-auth-name}}
         PASSWORD: {{development-auth-pass}}
@@ -154,6 +155,7 @@ jobs:
       path: compiled
       current_app_name: nfs-broker
       manifest: config/ci/manifest.yml
+      show_app_log: true
       environment_variables:
         USERNAME: {{staging-auth-name}}
         PASSWORD: {{staging-auth-pass}}
@@ -282,6 +284,7 @@ jobs:
       path: compiled
       current_app_name: nfs-broker
       manifest: config/ci/manifest.yml
+      show_app_log: true
       environment_variables:
         USERNAME: {{production-auth-name}}
         PASSWORD: {{production-auth-pass}}
