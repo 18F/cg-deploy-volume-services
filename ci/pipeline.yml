@@ -42,7 +42,7 @@ jobs:
       BROKER_NAME: nfs-broker
       AUTH_USER: {{development-auth-name}}
       AUTH_PASS: {{development-auth-pass}}
-      SERVICES: nfs
+      SERVICES: nfs nfs-expertimental
       SERVICE_ORGANIZATION: {{service-organization-development}}
   on_success:
     put: slack

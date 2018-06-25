@@ -16,3 +16,4 @@ pushd release-src/src/code.cloudfoundry.org/nfsbroker
 popd
 
 cp config/ci/Procfile compiled
+cp config/default_services.json compiled
