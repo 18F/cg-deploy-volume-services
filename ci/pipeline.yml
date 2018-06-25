@@ -386,7 +386,7 @@ resources:
   type: git
   source:
     uri: {{config-git-url}}
-    branch: update-for-services-config
+    branch: master
 
 - name: pipeline-tasks
   type: git
