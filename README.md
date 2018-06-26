@@ -1,5 +1,8 @@
 # cg-deploy-volume-services
 
+## Deployment
+NFS is experimental.  In order to minimize potential impacts, the broker creates services which are available to the `sandbox` isolation segments.  Applications which are not in that isolation segment will not be able to access NFS.
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.

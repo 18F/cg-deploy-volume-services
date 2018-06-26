@@ -3,7 +3,7 @@ buildpack: binary_buildpack
 services:
 - nfs-volume
 env:
-  SERVICENAME: nfs #service name to publish in the marketplace
+  SERVICES_CONFIG: default_services.json # default broker catalog file
   USERNAME: admin
   PASSWORD: admin
   LOGLEVEL: info #error, warn, info, debug

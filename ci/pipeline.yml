@@ -42,7 +42,7 @@ jobs:
       BROKER_NAME: nfs-broker
       AUTH_USER: {{development-auth-name}}
       AUTH_PASS: {{development-auth-pass}}
-      SERVICES: nfs
+      SERVICES: nfs nfs-experimental
       SERVICE_ORGANIZATION: {{service-organization-development}}
   on_success:
     put: slack
@@ -259,11 +259,9 @@ jobs:
   plan:
   - aggregate:
     - get: config
-      trigger: true
       passed: [test-staging]
     - get: release-src
       passed: [test-staging]
-      trigger: true
     - get: pipeline-tasks
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
@@ -388,7 +386,7 @@ resources:
   type: git
   source:
     uri: {{config-git-url}}
-    branch: {{config-git-branch}}
+    branch: master
 
 - name: pipeline-tasks
   type: git
