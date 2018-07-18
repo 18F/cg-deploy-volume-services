@@ -260,8 +260,10 @@ jobs:
   - aggregate:
     - get: config
       passed: [test-staging]
+      trigger: true
     - get: release-src
       passed: [test-staging]
+      trigger: true
     - get: pipeline-tasks
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
@@ -386,7 +388,7 @@ resources:
   type: git
   source:
     uri: {{config-git-url}}
-    branch: master
+    branch: {{config-git-branch}}
 
 - name: pipeline-tasks
   type: git
@@ -431,28 +433,28 @@ resources:
 - name: master-bosh-root-cert
   type: s3-iam
   source:
-    bucket: {{private-bucket-production}}
+    bucket: {{private-bucket}}
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
 
 - name: common-development
   type: s3-iam
   source:
-    bucket: {{private-bucket-development}}
+    bucket: {{private-bucket}}
     versioned_file: nfs-development-decrypted.yml
     region_name: {{aws-region}}
 
 - name: common-staging
   type: s3-iam
   source:
-    bucket: {{private-bucket-staging}}
+    bucket: {{private-bucket}}
     versioned_file: nfs-staging-decrypted.yml
     region_name: {{aws-region}}
 
 - name: common-production
   type: s3-iam
   source:
-    bucket: {{private-bucket-production}}
+    bucket: {{private-bucket}}
     versioned_file: nfs-production-decrypted.yml
     region_name: {{aws-region}}
 
