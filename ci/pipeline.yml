@@ -241,8 +241,10 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       passed: [deploy-nfs-server-staging]
+      trigger: true
     - get: stemcell
       passed: [deploy-nfs-server-staging]
+      trigger: true
   - task: test
     file: config/ci/acceptance-test.yml
     params:
