@@ -47,5 +47,9 @@ instance_groups:
   - name: nfstestserver
     release: nfs-volume
     properties:
-      nfstestserver:
-        export_volumes: ((nfstestserver-volumes))
+      # This is a bandaid until the following PRs are accepted upstream
+      # https://github.com/cloudfoundry-incubator/credhub-cli/pull/49
+      # https://github.com/cloudfoundry-incubator/credhub/pull/42
+      nfstestserver: ((nfstestserver-volumes))
+        # This is the line to uncomment, and remove the variable above.
+        # export_volumes: ((nfstestserver-volumes))

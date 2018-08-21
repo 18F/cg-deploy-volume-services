@@ -111,8 +111,6 @@ jobs:
       - nfs-volume-release/*.tgz
       stemcells:
       - stemcell/*.tgz
-      ops_files:
-      - config/bosh/opsfiles/volumes.yml
       vars_files:
       - config/bosh/varsfiles/development.yml
   on_success:

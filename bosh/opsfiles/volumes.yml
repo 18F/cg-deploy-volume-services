@@ -1,8 +1,0 @@
-# Required for CredHub because credentials values cannot be an array,
-# so the value here includes the key `export_volumes` that it is replacing
-# in the file path `bosh/manifest.yml` in this repo.
-# https://github.com/cloudfoundry-incubator/credhub-cli/issues/30
-- type: replace
-  path: /instance_groups/name=nfs-server/jobs/name=nfstestserver/properties
-  value:
-    nfstestserver: ((nfstestserver-volumes))
