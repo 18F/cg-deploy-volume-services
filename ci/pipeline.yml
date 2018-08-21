@@ -1,5 +1,16 @@
 ---
 groups:
+- name: all
+  jobs:
+  - deploy-nfs-broker-development
+  - deploy-nfs-server-development
+  - test-development
+  - deploy-nfs-broker-staging
+  - deploy-nfs-server-staging
+  - test-staging
+  - deploy-nfs-broker-production
+  - deploy-nfs-server-production
+  - test-production
 - name: development
   jobs:
   - deploy-nfs-broker-development
