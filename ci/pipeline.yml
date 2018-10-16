@@ -72,8 +72,6 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common-development
-      trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
@@ -87,7 +85,6 @@ jobs:
       - stemcell/*.tgz
       vars_files:
       - config/bosh/varsfiles/development.yml
-      - common-development/nfs-development-decrypted.yml
   on_success:
     put: slack
     params:
@@ -206,7 +203,7 @@ jobs:
       trigger: true
     - get: master-bosh-root-cert
   - put: nfs-server-staging
-    params: 
+    params:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/staging.yml
@@ -438,13 +435,6 @@ resources:
     bucket: {{private-bucket}}
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
-
-- name: common-development
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-development-decrypted.yml
-    region_name: {{aws-region}}
 
 - name: common-staging
   type: s3-iam
