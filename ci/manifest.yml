@@ -4,8 +4,8 @@ services:
 - nfs-volume
 env:
   SERVICES_CONFIG: default_services.json # default broker catalog file
-  USERNAME: admin
-  PASSWORD: admin
+  # USERNAME: admin
+  # PASSWORD: admin
   LOGLEVEL: info #error, warn, info, debug
   DBDRIVERNAME: postgres #mysql or postgres
 
