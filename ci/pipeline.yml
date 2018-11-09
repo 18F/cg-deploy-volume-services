@@ -284,15 +284,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-production
+  - task: deploy-production
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{production-auth-name}}
-        PASSWORD: {{production-auth-pass}}
+      USERNAME: {{production-auth-name}}
+      PASSWORD: {{production-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-username-production}}
+      CF_PASSWORD: {{cf-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -407,15 +410,6 @@ resources:
     uri: {{release-git-url}}
     branch: {{release-git-branch}}
     tag_filter: v*
-
-- name: broker-app-production
-  type: cf
-  source:
-    api: {{cf-api-url-production}}
-    username: {{cf-username-production}}
-    password: {{cf-password-production}}
-    organization: {{cf-organization-production}}
-    space: {{cf-space-production}}
 
 - name: master-bosh-root-cert
   type: s3-iam
