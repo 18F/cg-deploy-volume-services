@@ -22,15 +22,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-development
+  - task: deploy-development
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{development-auth-name}}
-        PASSWORD: {{development-auth-pass}}
+      USERNAME: {{development-auth-name}}
+      PASSWORD: {{development-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-development}}
+      CF_USERNAME: {{cf-username-development}}
+      CF_PASSWORD: {{cf-password-development}}
+      CF_ORGANIZATION: {{cf-organization-development}}
+      CF_SPACE: {{cf-space-development}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
