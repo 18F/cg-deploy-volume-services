@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eux
+go get github.com/geofffranks/spruce/...
 
 cat > vars.yml <<- "EOF"
 development-auth-name: ${USERNAME}
