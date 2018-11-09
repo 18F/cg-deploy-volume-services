@@ -150,15 +150,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-staging
+  - task: deploy-staging
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{staging-auth-name}}
-        PASSWORD: {{staging-auth-pass}}
+      USERNAME: {{staging-auth-name}}
+      PASSWORD: {{staging-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-username-staging}}
+      CF_PASSWORD: {{cf-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -404,15 +407,6 @@ resources:
     uri: {{release-git-url}}
     branch: {{release-git-branch}}
     tag_filter: v*
-
-- name: broker-app-staging
-  type: cf
-  source:
-    api: {{cf-api-url-staging}}
-    username: {{cf-username-staging}}
-    password: {{cf-password-staging}}
-    organization: {{cf-organization-staging}}
-    space: {{cf-space-staging}}
 
 - name: broker-app-production
   type: cf
