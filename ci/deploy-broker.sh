@@ -15,4 +15,4 @@ cf api "${CF_API_URL}"
 (set +x; cf auth "${CF_USERNAME}" "${CF_PASSWORD}")
 cf target -o "${CF_ORGANIZATION}" -s "${CF_SPACE}"
 
-cf zero-downtime-push "${APP-NAME}" -p compiled -m manifest.yml
+cf zero-downtime-push "${APP_NAME}" -p compiled -f manifest.yml
