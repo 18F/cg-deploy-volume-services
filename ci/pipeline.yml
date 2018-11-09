@@ -405,15 +405,6 @@ resources:
     branch: {{release-git-branch}}
     tag_filter: v*
 
-- name: broker-app-development
-  type: cf
-  source:
-    api: {{cf-api-url-development}}
-    username: {{cf-username-development}}
-    password: {{cf-password-development}}
-    organization: {{cf-organization-development}}
-    space: {{cf-space-development}}
-
 - name: broker-app-staging
   type: cf
   source:
