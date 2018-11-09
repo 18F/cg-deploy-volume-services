@@ -1,6 +1,7 @@
 #!/bin/bash
 
 set -eux
+
 cat > vars.yml <<- "EOF"
 development-auth-name: ${USERNAME}
 development-auth-pass: ${PASSWORD}
