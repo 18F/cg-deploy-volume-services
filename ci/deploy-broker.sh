@@ -5,7 +5,7 @@ go get github.com/geofffranks/spruce/...
 curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github" | tar xzv -C /usr/local/bin cf && \
 cf install-plugin autopilot -f -r CF-Community
 
-cat > vars.yml <<- "EOF"
+cat > vars.yml <<EOF
 development-auth-name: ${USERNAME}
 development-auth-pass: ${PASSWORD}
 EOF
