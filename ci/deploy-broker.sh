@@ -6,8 +6,9 @@ curl -L "https://cli.run.pivotal.io/stable?release=linux64-binary&source=github"
 cf install-plugin autopilot -f -r CF-Community
 
 cat > vars.yml <<EOF
-development-auth-name: ${USERNAME}
-development-auth-pass: ${PASSWORD}
+env:
+  USERNAME: ${USERNAME}
+  PASSWORD: ${PASSWORD}
 EOF
 spruce merge "${MANIFEST}" vars.yml > manifest.yml
 
