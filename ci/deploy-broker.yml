@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
 - name: compiled 
+- name: config
 
 run:
   path: config/ci/deploy-broker.sh
