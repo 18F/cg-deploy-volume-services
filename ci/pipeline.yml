@@ -203,8 +203,6 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common-staging
-      trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
@@ -213,7 +211,6 @@ jobs:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/staging.yml
-      - common-staging/nfs-staging-decrypted.yml
   on_success:
     put: slack
     params:
@@ -417,13 +414,6 @@ resources:
     bucket: {{private-bucket}}
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
-
-- name: common-staging
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-staging-decrypted.yml
-    region_name: {{aws-region}}
 
 - name: common-production
   type: s3-iam
