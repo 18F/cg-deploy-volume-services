@@ -22,15 +22,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-development
+  - task: deploy-development
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{development-auth-name}}
-        PASSWORD: {{development-auth-pass}}
+      USERNAME: {{development-auth-name}}
+      PASSWORD: {{development-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-development}}
+      CF_USERNAME: {{cf-username-development}}
+      CF_PASSWORD: {{cf-password-development}}
+      CF_ORGANIZATION: {{cf-organization-development}}
+      CF_SPACE: {{cf-space-development}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -72,8 +75,6 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common-development
-      trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
@@ -87,7 +88,6 @@ jobs:
       - stemcell/*.tgz
       vars_files:
       - config/bosh/varsfiles/development.yml
-      - common-development/nfs-development-decrypted.yml
   on_success:
     put: slack
     params:
@@ -150,15 +150,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-staging
+  - task: deploy-staging
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{staging-auth-name}}
-        PASSWORD: {{staging-auth-pass}}
+      USERNAME: {{staging-auth-name}}
+      PASSWORD: {{staging-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-staging}}
+      CF_USERNAME: {{cf-username-staging}}
+      CF_PASSWORD: {{cf-password-staging}}
+      CF_ORGANIZATION: {{cf-organization-staging}}
+      CF_SPACE: {{cf-space-staging}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -200,17 +203,14 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: common-staging
-      trigger: true
     - get: stemcell
       trigger: true
     - get: master-bosh-root-cert
   - put: nfs-server-staging
-    params: 
+    params:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/staging.yml
-      - common-staging/nfs-staging-decrypted.yml
   on_success:
     put: slack
     params:
@@ -281,15 +281,18 @@ jobs:
       TIMEOUT: 300
   - task: compile-broker
     file: config/ci/compile-broker.yml
-  - put: broker-app-production
+  - task: deploy-production
+    file: config/ci/deploy-broker.yml
     params:
-      path: compiled
-      current_app_name: nfs-broker
-      manifest: config/ci/manifest.yml
-      show_app_log: true
-      environment_variables:
-        USERNAME: {{production-auth-name}}
-        PASSWORD: {{production-auth-pass}}
+      USERNAME: {{production-auth-name}}
+      PASSWORD: {{production-auth-pass}}
+      MANIFEST: config/ci/manifest.yml
+      APP_NAME: nfs-broker
+      CF_API_URL: {{cf-api-url-production}}
+      CF_USERNAME: {{cf-username-production}}
+      CF_PASSWORD: {{cf-password-production}}
+      CF_ORGANIZATION: {{cf-organization-production}}
+      CF_SPACE: {{cf-space-production}}
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
@@ -333,8 +336,6 @@ jobs:
     - get: nfs-volume-release
       passed: [test-staging]
       trigger: true
-    - get: common-production
-      trigger: true
     - get: stemcell
       passed: [test-staging]
       trigger: true
@@ -344,7 +345,6 @@ jobs:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/production.yml
-      - common-production/nfs-production-decrypted.yml
   on_success:
     put: slack
     params:
@@ -405,60 +405,12 @@ resources:
     branch: {{release-git-branch}}
     tag_filter: v*
 
-- name: broker-app-development
-  type: cf
-  source:
-    api: {{cf-api-url-development}}
-    username: {{cf-username-development}}
-    password: {{cf-password-development}}
-    organization: {{cf-organization-development}}
-    space: {{cf-space-development}}
-
-- name: broker-app-staging
-  type: cf
-  source:
-    api: {{cf-api-url-staging}}
-    username: {{cf-username-staging}}
-    password: {{cf-password-staging}}
-    organization: {{cf-organization-staging}}
-    space: {{cf-space-staging}}
-
-- name: broker-app-production
-  type: cf
-  source:
-    api: {{cf-api-url-production}}
-    username: {{cf-username-production}}
-    password: {{cf-password-production}}
-    organization: {{cf-organization-production}}
-    space: {{cf-space-production}}
-
 - name: master-bosh-root-cert
   type: s3-iam
   source:
     bucket: {{private-bucket}}
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
-
-- name: common-development
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-development-decrypted.yml
-    region_name: {{aws-region}}
-
-- name: common-staging
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-staging-decrypted.yml
-    region_name: {{aws-region}}
-
-- name: common-production
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-production-decrypted.yml
-    region_name: {{aws-region}}
 
 - name: nfs-volume-release
   type: s3-iam

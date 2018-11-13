@@ -1,8 +1,6 @@
 name: nfs-volume
 
 releases:
-- name: consul
-  version: latest
 - name: nfs-volume
   version: latest
 
@@ -27,23 +25,6 @@ instance_groups:
   - name: services
   instances: 1
   jobs:
-  - name: consul_agent
-    release: consul
-    consumes:
-      consul_common:
-        from: consul_common_link
-        deployment: ((cf_deployment))
-      consul_server: nil
-      consul_client:
-        from: consul_client_link
-        deployment: ((cf_deployment))
-    properties:
-      consul:
-        agent:
-          services:
-            nfstestserver:
-              name: nfstestserver
-              check: {}
   - name: nfstestserver
     release: nfs-volume
     properties:
