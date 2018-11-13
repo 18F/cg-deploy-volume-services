@@ -336,8 +336,6 @@ jobs:
     - get: nfs-volume-release
       passed: [test-staging]
       trigger: true
-    - get: common-production
-      trigger: true
     - get: stemcell
       passed: [test-staging]
       trigger: true
@@ -347,7 +345,6 @@ jobs:
       <<: *nfs-server-params
       vars_files:
       - config/bosh/varsfiles/production.yml
-      - common-production/nfs-production-decrypted.yml
   on_success:
     put: slack
     params:
@@ -414,13 +411,6 @@ resources:
     bucket: {{private-bucket}}
     region_name: {{aws-region}}
     versioned_file: master-bosh.crt
-
-- name: common-production
-  type: s3-iam
-  source:
-    bucket: {{private-bucket}}
-    versioned_file: nfs-production-decrypted.yml
-    region_name: {{aws-region}}
 
 - name: nfs-volume-release
   type: s3-iam
