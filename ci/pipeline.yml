@@ -116,6 +116,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-development]
       trigger: true
+    - get: acceptance-src
+      trigger: true
   - task: test
     file: config/ci/acceptance-test.yml
     params:
@@ -404,6 +406,12 @@ resources:
     uri: {{release-git-url}}
     branch: {{release-git-branch}}
     tag_filter: v*
+
+- name: acceptance-src
+  type: git
+  source:
+    uri: {{acceptance-git-url}}
+    branch: {{acceptance-git-branch}}
 
 - name: master-bosh-root-cert
   type: s3-iam
