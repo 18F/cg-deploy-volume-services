@@ -377,6 +377,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-production]
       trigger: true
+    - get: acceptance-src
+      trigger: true
   - task: test
     file: config/ci/acceptance-test.yml
     params:
