@@ -241,6 +241,8 @@ jobs:
     - get: release-src
       passed: [deploy-nfs-broker-staging]
       trigger: true
+    - get: acceptance-src
+      trigger: true
     - get: nfs-volume-release
       passed: [deploy-nfs-server-staging]
       trigger: true

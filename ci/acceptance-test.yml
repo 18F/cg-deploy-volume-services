@@ -8,6 +8,7 @@ image_resource:
 
 inputs:
 - name: release-src
+- name: acceptance-src
 - name: config
 
 run:
