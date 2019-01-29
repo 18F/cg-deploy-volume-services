@@ -13,3 +13,4 @@ env:
   # it should be omitted and the other db connection parameters should be set.
   DBSERVICENAME: aws-rds #service name for db service as seen in `cf marketplace`
   ALLOWED_OPTIONS: "uid,gid,auto_cache,username,password"
+stack: cflinuxfs2
