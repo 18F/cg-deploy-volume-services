@@ -75,7 +75,7 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: stemcell
+    - get: stemcell-xenial
       trigger: true
     - get: master-bosh-root-cert
   - put: nfs-server-development
@@ -85,7 +85,7 @@ jobs:
       releases:
       - nfs-volume-release/*.tgz
       stemcells:
-      - stemcell/*.tgz
+      - stemcell-xenial/*.tgz
       vars_files:
       - config/bosh/varsfiles/development.yml
   on_success:
@@ -205,7 +205,7 @@ jobs:
       trigger: true
     - get: nfs-volume-release
       trigger: true
-    - get: stemcell
+    - get: stemcell-xenial
       trigger: true
     - get: master-bosh-root-cert
   - put: nfs-server-staging
@@ -246,7 +246,7 @@ jobs:
     - get: nfs-volume-release
       passed: [deploy-nfs-server-staging]
       trigger: true
-    - get: stemcell
+    - get: stemcell-xenial
       passed: [deploy-nfs-server-staging]
       trigger: true
   - task: test
@@ -340,7 +340,7 @@ jobs:
     - get: nfs-volume-release
       passed: [test-staging]
       trigger: true
-    - get: stemcell
+    - get: stemcell-xenial
       passed: [test-staging]
       trigger: true
     - get: master-bosh-root-cert
@@ -431,10 +431,10 @@ resources:
     bucket: {{bosh-releases-bucket}}
     region_name: {{aws-region}}
 
-- name: stemcell
+- name: stemcell-xenial
   type: bosh-io-stemcell
   source:
-    name: bosh-aws-xen-hvm-ubuntu-trusty-go_agent
+    name: bosh-aws-xen-hvm-ubuntu-xenial-go_agent
 
 - name: nfs-server-development
   type: bosh-deployment
