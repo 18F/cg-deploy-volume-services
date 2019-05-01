@@ -1,5 +1,6 @@
 ---
 buildpack: binary_buildpack
+stack: cflinuxfs3
 services:
 - nfs-volume
 env:
