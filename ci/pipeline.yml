@@ -2,7 +2,7 @@
 jobs:
 - name: deploy-nfs-broker-development
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       trigger: true
     - get: release-src
@@ -11,11 +11,11 @@ jobs:
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
     params:
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-username-development}}
-      CF_PASSWORD: {{cf-password-development}}
-      CF_ORGANIZATION: {{broker-organization-development}}
-      CF_SPACE: {{broker-space-development}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-username-development))
+      CF_PASSWORD: ((cf-password-development))
+      CF_ORGANIZATION: ((broker-organization-development))
+      CF_SPACE: ((broker-space-development))
       SERVICE_NAME: aws-rds
       PLAN_NAME: shared-psql
       INSTANCE_NAME: nfs-volume
@@ -25,51 +25,51 @@ jobs:
   - task: deploy-development
     file: config/ci/deploy-broker.yml
     params:
-      USERNAME: {{development-auth-name}}
-      PASSWORD: {{development-auth-pass}}
+      USERNAME: ((development-auth-name))
+      PASSWORD: ((development-auth-pass))
       MANIFEST: config/ci/manifest.yml
       APP_NAME: nfs-broker
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-username-development}}
-      CF_PASSWORD: {{cf-password-development}}
-      CF_ORGANIZATION: {{cf-organization-development}}
-      CF_SPACE: {{cf-space-development}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-username-development))
+      CF_PASSWORD: ((cf-password-development))
+      CF_ORGANIZATION: ((cf-organization-development))
+      CF_SPACE: ((cf-space-development))
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-username-development}}
-      CF_PASSWORD: {{cf-password-development}}
-      CF_ORGANIZATION: {{cf-organization-development}}
-      CF_SPACE: {{cf-space-development}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-username-development))
+      CF_PASSWORD: ((cf-password-development))
+      CF_ORGANIZATION: ((cf-organization-development))
+      CF_SPACE: ((cf-space-development))
       BROKER_NAME: nfs-broker
-      AUTH_USER: {{development-auth-name}}
-      AUTH_PASS: {{development-auth-pass}}
+      AUTH_USER: ((development-auth-name))
+      AUTH_PASS: ((development-auth-pass))
       SERVICES: nfs nfs-experimental
-      SERVICE_ORGANIZATION: {{service-organization-development}}
+      SERVICE_ORGANIZATION: ((service-organization-development))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed nfsbroker on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfsbroker on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-nfs-server-development
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: config
       trigger: true
@@ -94,22 +94,22 @@ jobs:
       text: |
         :white_check_mark: Successfully deployed nfstestserver on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfstestserver on development
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: test-development
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       passed: [deploy-nfs-broker-development, deploy-nfs-server-development]
       trigger: true
@@ -121,18 +121,18 @@ jobs:
   - task: test
     file: config/ci/acceptance-test.yml
     params:
-      CF_API_URL: {{cf-api-url-development}}
-      CF_USERNAME: {{cf-username-development}}
-      CF_PASSWORD: {{cf-password-development}}
-      CF_ORGANIZATION: {{test-organization-development}}
-      CF_SPACE: {{test-space-development}}
+      CF_API_URL: ((cf-api-url-development))
+      CF_USERNAME: ((cf-username-development))
+      CF_PASSWORD: ((cf-password-development))
+      CF_ORGANIZATION: ((test-organization-development))
+      CF_SPACE: ((test-space-development))
       SERVICE_NAME: nfs
       PLAN_NAME: Existing
-      SHARE_ID: {{test-share-id-development}}
+      SHARE_ID: ((test-share-id-development))
 
 - name: deploy-nfs-broker-staging
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       trigger: true
     - get: release-src
@@ -141,11 +141,11 @@ jobs:
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
     params:
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-username-staging}}
-      CF_PASSWORD: {{cf-password-staging}}
-      CF_ORGANIZATION: {{broker-organization-staging}}
-      CF_SPACE: {{broker-space-staging}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-username-staging))
+      CF_PASSWORD: ((cf-password-staging))
+      CF_ORGANIZATION: ((broker-organization-staging))
+      CF_SPACE: ((broker-space-staging))
       SERVICE_NAME: aws-rds
       PLAN_NAME: shared-psql
       INSTANCE_NAME: nfs-volume
@@ -155,51 +155,51 @@ jobs:
   - task: deploy-staging
     file: config/ci/deploy-broker.yml
     params:
-      USERNAME: {{staging-auth-name}}
-      PASSWORD: {{staging-auth-pass}}
+      USERNAME: ((staging-auth-name))
+      PASSWORD: ((staging-auth-pass))
       MANIFEST: config/ci/manifest.yml
       APP_NAME: nfs-broker
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-username-staging}}
-      CF_PASSWORD: {{cf-password-staging}}
-      CF_ORGANIZATION: {{cf-organization-staging}}
-      CF_SPACE: {{cf-space-staging}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-username-staging))
+      CF_PASSWORD: ((cf-password-staging))
+      CF_ORGANIZATION: ((cf-organization-staging))
+      CF_SPACE: ((cf-space-staging))
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-username-staging}}
-      CF_PASSWORD: {{cf-password-staging}}
-      CF_ORGANIZATION: {{cf-organization-staging}}
-      CF_SPACE: {{cf-space-staging}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-username-staging))
+      CF_PASSWORD: ((cf-password-staging))
+      CF_ORGANIZATION: ((cf-organization-staging))
+      CF_SPACE: ((cf-space-staging))
       BROKER_NAME: nfs-broker
-      AUTH_USER: {{staging-auth-name}}
-      AUTH_PASS: {{staging-auth-pass}}
+      AUTH_USER: ((staging-auth-name))
+      AUTH_PASS: ((staging-auth-pass))
       SERVICES: nfs
-      SERVICE_ORGANIZATION: {{service-organization-staging}}
+      SERVICE_ORGANIZATION: ((service-organization-staging))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed nfsbroker on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfsbroker on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-nfs-server-staging
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: config
       trigger: true
@@ -219,22 +219,22 @@ jobs:
       text: |
         :white_check_mark: Successfully deployed nfstestserver on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfstestserver on staging
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: test-staging
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       passed: [deploy-nfs-broker-staging, deploy-nfs-server-staging]
       trigger: true
@@ -252,18 +252,18 @@ jobs:
   - task: test
     file: config/ci/acceptance-test.yml
     params:
-      CF_API_URL: {{cf-api-url-staging}}
-      CF_USERNAME: {{cf-username-staging}}
-      CF_PASSWORD: {{cf-password-staging}}
-      CF_ORGANIZATION: {{test-organization-staging}}
-      CF_SPACE: {{test-space-staging}}
+      CF_API_URL: ((cf-api-url-staging))
+      CF_USERNAME: ((cf-username-staging))
+      CF_PASSWORD: ((cf-password-staging))
+      CF_ORGANIZATION: ((test-organization-staging))
+      CF_SPACE: ((test-space-staging))
       SERVICE_NAME: nfs
       PLAN_NAME: Existing
-      SHARE_ID: {{test-share-id-staging}}
+      SHARE_ID: ((test-share-id-staging))
 
 - name: deploy-nfs-broker-production
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       passed: [test-staging]
       trigger: true
@@ -274,11 +274,11 @@ jobs:
   - task: ensure-database
     file: pipeline-tasks/ensure-service.yml
     params:
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-username-production}}
-      CF_PASSWORD: {{cf-password-production}}
-      CF_ORGANIZATION: {{broker-organization-production}}
-      CF_SPACE: {{broker-space-production}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-username-production))
+      CF_PASSWORD: ((cf-password-production))
+      CF_ORGANIZATION: ((broker-organization-production))
+      CF_SPACE: ((broker-space-production))
       SERVICE_NAME: aws-rds
       PLAN_NAME: shared-psql
       INSTANCE_NAME: nfs-volume
@@ -288,51 +288,51 @@ jobs:
   - task: deploy-production
     file: config/ci/deploy-broker.yml
     params:
-      USERNAME: {{production-auth-name}}
-      PASSWORD: {{production-auth-pass}}
+      USERNAME: ((production-auth-name))
+      PASSWORD: ((production-auth-pass))
       MANIFEST: config/ci/manifest.yml
       APP_NAME: nfs-broker
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-username-production}}
-      CF_PASSWORD: {{cf-password-production}}
-      CF_ORGANIZATION: {{cf-organization-production}}
-      CF_SPACE: {{cf-space-production}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-username-production))
+      CF_PASSWORD: ((cf-password-production))
+      CF_ORGANIZATION: ((cf-organization-production))
+      CF_SPACE: ((cf-space-production))
   - task: update-broker
     file: pipeline-tasks/register-service-broker.yml
     params:
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-username-production}}
-      CF_PASSWORD: {{cf-password-production}}
-      CF_ORGANIZATION: {{cf-organization-production}}
-      CF_SPACE: {{cf-space-production}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-username-production))
+      CF_PASSWORD: ((cf-password-production))
+      CF_ORGANIZATION: ((cf-organization-production))
+      CF_SPACE: ((cf-space-production))
       BROKER_NAME: nfs-broker
-      AUTH_USER: {{production-auth-name}}
-      AUTH_PASS: {{production-auth-pass}}
+      AUTH_USER: ((production-auth-name))
+      AUTH_PASS: ((production-auth-pass))
       SERVICES: nfs
-      SERVICE_ORGANIZATION: {{service-organization-production}}
+      SERVICE_ORGANIZATION: ((service-organization-production))
   on_success:
     put: slack
     params:
       text: |
         :white_check_mark: Successfully deployed nfsbroker on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfsbroker on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: deploy-nfs-server-production
   serial: true
   plan:
-  - aggregate:
+  - in_parallel:
     - get: pipeline-tasks
     - get: config
       passed: [test-staging]
@@ -355,22 +355,22 @@ jobs:
       text: |
         :white_check_mark: Successfully deployed nfstestserver on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
   on_failure:
     put: slack
     params:
       text: |
         :x: FAILED to deploy nfstestserver on production
         <$ATC_EXTERNAL_URL/teams/$BUILD_TEAM_NAME/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME|View build details>
-      channel: {{slack-channel}}
-      username: {{slack-username}}
-      icon_url: {{slack-icon-url}}
+      channel: ((slack-channel))
+      username: ((slack-username))
+      icon_url: ((slack-icon-url))
 
 - name: test-production
   plan:
-  - aggregate:
+  - in_parallel:
     - get: config
       passed: [deploy-nfs-broker-production, deploy-nfs-server-production]
       trigger: true
@@ -382,54 +382,54 @@ jobs:
   - task: test
     file: config/ci/acceptance-test.yml
     params:
-      CF_API_URL: {{cf-api-url-production}}
-      CF_USERNAME: {{cf-username-production}}
-      CF_PASSWORD: {{cf-password-production}}
-      CF_ORGANIZATION: {{test-organization-production}}
-      CF_SPACE: {{test-space-production}}
+      CF_API_URL: ((cf-api-url-production))
+      CF_USERNAME: ((cf-username-production))
+      CF_PASSWORD: ((cf-password-production))
+      CF_ORGANIZATION: ((test-organization-production))
+      CF_SPACE: ((test-space-production))
       SERVICE_NAME: nfs
       PLAN_NAME: Existing
-      SHARE_ID: {{test-share-id-production}}
+      SHARE_ID: ((test-share-id-production))
 
 resources:
 - name: config
   type: git
   source:
-    uri: {{config-git-url}}
-    branch: {{config-git-branch}}
+    uri: ((config-git-url))
+    branch: ((config-git-branch))
 
 - name: pipeline-tasks
   type: git
   source:
-    uri: {{pipeline-tasks-git-url}}
-    branch: {{pipeline-tasks-git-branch}}
+    uri: ((pipeline-tasks-git-url))
+    branch: ((pipeline-tasks-git-branch))
 
 - name: release-src
   type: git
   source:
-    uri: {{release-git-url}}
-    branch: {{release-git-branch}}
+    uri: ((release-git-url))
+    branch: ((release-git-branch))
     tag_filter: v*
 
 - name: acceptance-src
   type: git
   source:
-    uri: {{acceptance-git-url}}
-    branch: {{acceptance-git-branch}}
+    uri: ((acceptance-git-url))
+    branch: ((acceptance-git-branch))
 
 - name: master-bosh-root-cert
   type: s3-iam
   source:
-    bucket: {{private-bucket}}
-    region_name: {{aws-region}}
+    bucket: ((private-bucket))
+    region_name: ((aws-region))
     versioned_file: master-bosh.crt
 
 - name: nfs-volume-release
   type: s3-iam
   source:
     regexp: nfs-volume-(.*).tgz
-    bucket: {{bosh-releases-bucket}}
-    region_name: {{aws-region}}
+    bucket: ((bosh-releases-bucket))
+    region_name: ((aws-region))
 
 - name: stemcell-xenial
   type: bosh-io-stemcell
@@ -466,7 +466,7 @@ resources:
 - name: slack
   type: slack-notification
   source:
-    url: {{slack-webhook-url}}
+    url: ((slack-webhook-url))
 
 resource_types:
 - name: slack-notification
